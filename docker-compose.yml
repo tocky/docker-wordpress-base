@@ -1,0 +1,27 @@
+version: '2'
+services:
+  db:
+    image: mysql:5.7
+    volumes:
+      - "./.data/db:/var/lib/mysql"
+      # Activate the following code if you need to load existing data as initial.
+      # But it will be necessary to get a dump file with mysqldump command before doing.
+      # refer: https://tech.recruit-mp.co.jp/infrastructure/post-11266/
+      # - "./.data/mysql.dump.sql:/docker-entrypoint-initdb.d/install_wordpress.sql"
+    restart: always
+    env_file: .env
+  wordpress:
+    depends_on:
+      - db
+    build: ./wordpress
+    volumes:
+      - "./src/plugins/myplugin:/usr/src/wordpress/wp-content/plugins/myplugin"
+      - "./src/themes/mytheme:/usr/src/wordpress/wp-content/theme/mytheme"
+    links:
+      - db
+    ports:
+      - "8000:80"
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+    env_file: .env
